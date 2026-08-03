@@ -4,6 +4,7 @@ import { User } from 'firebase/auth';
 import { db } from '../lib/firebase';
 import { CategoryKey, ScoreCard } from '../types/yahtzee';
 import { calculateCategoryScore, updateScoreCardTotals, isScoreCardFinished, isYahtzee } from '../lib/yahtzeeLogic';
+import { triggerYahtzeeConfetti } from '../lib/confetti';
 import { Dice3D } from './Dice3D';
 import { ScoreBoard } from './ScoreBoard';
 import { FireworksOverlay } from './FireworksOverlay';
@@ -46,7 +47,7 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
       setIsRolling(false);
 
       if (isYahtzee(nextDice)) {
-        sounds.playYahtzeeFanfare();
+        triggerYahtzeeConfetti();
       }
     }, 600);
   };

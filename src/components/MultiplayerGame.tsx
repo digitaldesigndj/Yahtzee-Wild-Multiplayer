@@ -4,6 +4,7 @@ import { User } from 'firebase/auth';
 import { db } from '../lib/firebase';
 import { MultiplayerGameState, CategoryKey, ScoreCard, ChatMessage } from '../types/yahtzee';
 import { calculateCategoryScore, updateScoreCardTotals, isScoreCardFinished, isYahtzee } from '../lib/yahtzeeLogic';
+import { triggerYahtzeeConfetti } from '../lib/confetti';
 import { getPlayerId } from '../lib/player';
 import { Dice3D } from './Dice3D';
 import { ScoreBoard } from './ScoreBoard';
@@ -143,7 +144,7 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       const nextHeld = game.held.map((h, idx) => h || nextDice[idx] === 7);
 
       if (isYahtzee(nextDice)) {
-        sounds.playYahtzeeFanfare();
+        triggerYahtzeeConfetti();
       }
 
       await updateDoc(doc(db, 'games', gameId), {
