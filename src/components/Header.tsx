@@ -26,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   setSoundEnabled
 }) => {
   return (
-    <header id="main-header" className="w-full bg-slate-950/95 border-b border-slate-800/80 backdrop-blur-md sticky top-0 z-40">
+    <header id="main-header" className="w-full bg-slate-950/95 border-b border-slate-800/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex flex-col md:flex-row items-center justify-between gap-2.5 md:gap-4">
         {/* Top bar on mobile: Logo on left, Controls on right */}
         <div className="w-full md:w-auto flex items-center justify-between gap-2">
