@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import confetti from 'canvas-confetti';
 import { collection, addDoc } from 'firebase/firestore';
 import { User } from 'firebase/auth';
 import { db } from '../lib/firebase';
 import { CategoryKey, ScoreCard } from '../types/yahtzee';
 import { calculateCategoryScore, updateScoreCardTotals, isScoreCardFinished, isYahtzee } from '../lib/yahtzeeLogic';
-import { triggerYahtzeeCelebration } from '../lib/confetti';
 import { Dice3D } from './Dice3D';
 import { ScoreBoard } from './ScoreBoard';
+import { FireworksOverlay } from './FireworksOverlay';
 import { sounds } from '../lib/audio';
 import { Trophy, RefreshCw, Sparkles, CheckCircle } from 'lucide-react';
 
@@ -24,6 +23,7 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
   const [isRolling, setIsRolling] = useState<boolean>(false);
   const [scoreCard, setScoreCard] = useState<ScoreCard>({});
   const [isFinished, setIsFinished] = useState<boolean>(false);
+  const [showFireworks, setShowFireworks] = useState<boolean>(false);
   const [savedToLeaderboard, setSavedToLeaderboard] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
@@ -46,7 +46,7 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
       setIsRolling(false);
 
       if (isYahtzee(nextDice)) {
-        triggerYahtzeeCelebration();
+        sounds.playYahtzeeFanfare();
       }
     }, 600);
   };
@@ -91,16 +91,7 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
     // Check if game is complete (all 13 categories filled)
     if (isScoreCardFinished(updatedCard)) {
       setIsFinished(true);
-      sounds.playYahtzeeFanfare();
-      try {
-        confetti({
-          particleCount: 120,
-          spread: 80,
-          origin: { y: 0.6 }
-        });
-      } catch (e) {
-        console.warn('Confetti error:', e);
-      }
+      setShowFireworks(true);
 
       // Auto save to Firestore leaderboard
       await saveScoreToLeaderboard(updatedCard.grandTotal || 0);
@@ -141,6 +132,7 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
     setIsRolling(false);
     setScoreCard({});
     setIsFinished(false);
+    setShowFireworks(false);
     setSavedToLeaderboard(false);
   };
 
@@ -232,6 +224,10 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
           </div>
         </div>
       </div>
+
+      {showFireworks && (
+        <FireworksOverlay durationMs={15000} onComplete={() => setShowFireworks(false)} />
+      )}
     </div>
   );
 };

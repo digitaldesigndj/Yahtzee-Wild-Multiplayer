@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import confetti from 'canvas-confetti';
 import { doc, onSnapshot, updateDoc, collection, addDoc, deleteDoc } from 'firebase/firestore';
 import { User } from 'firebase/auth';
 import { db } from '../lib/firebase';
 import { MultiplayerGameState, CategoryKey, ScoreCard, ChatMessage } from '../types/yahtzee';
 import { calculateCategoryScore, updateScoreCardTotals, isScoreCardFinished, isYahtzee } from '../lib/yahtzeeLogic';
-import { triggerYahtzeeCelebration } from '../lib/confetti';
 import { getPlayerId } from '../lib/player';
 import { Dice3D } from './Dice3D';
 import { ScoreBoard } from './ScoreBoard';
+import { FireworksOverlay } from './FireworksOverlay';
 import { sounds } from '../lib/audio';
 import { Users, Crown, Send, Trophy, ArrowLeft, Copy, Check, MessageSquare, Sparkles, RefreshCw, Clock } from 'lucide-react';
 
@@ -29,6 +28,7 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   const [copiedCode, setCopiedCode] = useState(false);
   const [chatText, setChatText] = useState('');
   const [selectedTabPlayerId, setSelectedTabPlayerId] = useState<string | null>(null);
+  const [showFireworks, setShowFireworks] = useState<boolean>(false);
   const [now, setNow] = useState<number>(Date.now());
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -58,6 +58,8 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
     return () => clearInterval(timer);
   }, [game?.status, game?.createdAt, gameId, onLeaveGame]);
 
+  const hasCelebratedRef = useRef(false);
+
   // Real-time Firestore sync
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'games', gameId), (snap) => {
@@ -65,14 +67,10 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         const data = { id: snap.id, ...snap.data() } as MultiplayerGameState;
         setGame(data);
 
-        // If game just finished, trigger confetti & sound
-        if (data.status === 'finished') {
-          sounds.playYahtzeeFanfare();
-          try {
-            confetti({ particleCount: 150, spread: 90, origin: { y: 0.5 } });
-          } catch (e) {
-            console.warn('Confetti error:', e);
-          }
+        // If game just finished, trigger fireworks once
+        if (data.status === 'finished' && !hasCelebratedRef.current) {
+          hasCelebratedRef.current = true;
+          setShowFireworks(true);
         }
       } else {
         onLeaveGame();
@@ -145,7 +143,7 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       const nextHeld = game.held.map((h, idx) => h || nextDice[idx] === 7);
 
       if (isYahtzee(nextDice)) {
-        triggerYahtzeeCelebration();
+        sounds.playYahtzeeFanfare();
       }
 
       await updateDoc(doc(db, 'games', gameId), {
@@ -610,6 +608,10 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
           </form>
         </div>
       </div>
+
+      {showFireworks && (
+        <FireworksOverlay durationMs={15000} onComplete={() => setShowFireworks(false)} />
+      )}
     </div>
   );
 };
