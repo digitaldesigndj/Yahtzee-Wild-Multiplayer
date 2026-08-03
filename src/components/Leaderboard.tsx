@@ -174,8 +174,8 @@ export const Leaderboard: React.FC = () => {
 
                       {/* Wild Dice Rolled */}
                       <td className="py-2.5 px-2 sm:py-3.5 sm:px-4 text-center">
-                        <span className="inline-flex items-center justify-center gap-1 font-mono font-bold text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2 py-0.5 rounded-md">
-                          <Dices className="w-3 h-3 text-emerald-400 shrink-0" />
+                        <span className="inline-flex items-center justify-center gap-1.5 font-mono font-bold text-xs text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/40 border border-emerald-500/40 dark:border-emerald-500/20 px-2.5 py-1 rounded-md shadow-sm">
+                          <Dices className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 stroke-[2.5]" />
                           {entry.wildDiceCount ?? 0}
                         </span>
                       </td>

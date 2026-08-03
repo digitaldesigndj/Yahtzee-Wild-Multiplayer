@@ -2,7 +2,7 @@ import React from 'react';
 import { User } from 'firebase/auth';
 import { ActiveTab } from '../types/yahtzee';
 import { sounds } from '../lib/audio';
-import { Dices, Trophy, Users, HelpCircle, Volume2, VolumeX, LogIn, LogOut, User as UserIcon, Pencil } from 'lucide-react';
+import { Dices, Trophy, Users, HelpCircle, Volume2, VolumeX, LogIn, LogOut, User as UserIcon, Pencil, Sun, Moon } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: ActiveTab;
@@ -13,6 +13,8 @@ interface HeaderProps {
   onSignOut: () => void;
   soundEnabled: boolean;
   setSoundEnabled: (val: boolean) => void;
+  theme: 'dark' | 'light';
+  onToggleTheme: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -23,7 +25,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuthModal,
   onSignOut,
   soundEnabled,
-  setSoundEnabled
+  setSoundEnabled,
+  theme,
+  onToggleTheme
 }) => {
   return (
     <header id="main-header" className="w-full bg-slate-950/95 border-b border-slate-800/80 backdrop-blur-md">
@@ -45,6 +49,19 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right Controls for Mobile/Tablet (< lg) */}
           <div className="flex lg:hidden items-center gap-1.5 shrink-0">
+            {/* Theme Toggle */}
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playClickSound();
+                onToggleTheme();
+              }}
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-100 transition-colors"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+            </button>
+
             {/* Sound Toggle */}
             <button
               type="button"
@@ -59,24 +76,38 @@ export const Header: React.FC<HeaderProps> = ({
               {soundEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
             </button>
 
-            {/* Auth button / Avatar */}
+            {/* Auth button / Avatar & Log Out */}
             {user ? (
-              <div
-                onClick={onOpenAuthModal}
-                className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1 cursor-pointer"
-              >
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName || 'User'}
-                    className="w-6 h-6 rounded-lg object-cover border border-emerald-500/40"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="w-6 h-6 rounded-lg bg-emerald-950 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs">
-                    {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
-                  </div>
-                )}
+              <div className="flex items-center gap-1">
+                <div
+                  onClick={onOpenAuthModal}
+                  title="Configure Player Profile"
+                  className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1 cursor-pointer"
+                >
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName || 'User'}
+                      className="w-6 h-6 rounded-lg object-cover border border-emerald-500/40"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-lg bg-emerald-950 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs">
+                      {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sounds.playClickSound();
+                    onSignOut();
+                  }}
+                  title="Log Out"
+                  className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-red-400 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             ) : (
               <button
@@ -149,6 +180,19 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right Controls for Desktop (>= lg) */}
         <div className="hidden lg:flex items-center gap-2 shrink-0">
+          {/* Theme Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClickSound();
+              onToggleTheme();
+            }}
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+          </button>
+
           {/* Sound Toggle */}
           <button
             type="button"

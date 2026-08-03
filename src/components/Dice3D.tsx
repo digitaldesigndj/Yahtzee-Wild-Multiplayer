@@ -70,7 +70,7 @@ const RenderPips: React.FC<{ value: number }> = ({ value }) => {
       {positions.map((pos, i) => (
         <span
           key={i}
-          className={`${pos} w-2.5 h-2.5 rounded-full bg-slate-900 shadow-inner place-self-center`}
+          className={`${pos} w-2.5 h-2.5 rounded-full bg-black shadow-inner place-self-center`}
         />
       ))}
     </div>
@@ -199,7 +199,7 @@ export const Dice3D: React.FC<Dice3DProps> = ({
                     ? 'bg-amber-100 ring-4 ring-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.8)] translate-y-[-4px]'
                     : isHeld
                     ? 'bg-amber-100 ring-4 ring-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.6)] translate-y-[-4px]'
-                    : 'bg-white hover:bg-slate-50 border-2 border-slate-200 shadow-lg'
+                    : 'bg-white hover:bg-amber-50 border-2 border-slate-200 shadow-lg'
                 } ${disabled || rollsLeft === 3 ? 'opacity-80 cursor-default' : ''}`}
               >
                 <RenderPips value={value} />

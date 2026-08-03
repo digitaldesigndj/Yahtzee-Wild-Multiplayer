@@ -41,6 +41,24 @@ export default function App() {
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('yahtzee_theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+    return 'dark';
+  });
+
+  // Apply theme class to <html> element
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'light') {
+      root.classList.add('light');
+      root.classList.remove('dark');
+    } else {
+      root.classList.add('dark');
+      root.classList.remove('light');
+    }
+    localStorage.setItem('yahtzee_theme', theme);
+  }, [theme]);
 
   // Listen for Google Auth state changes
   useEffect(() => {
@@ -58,8 +76,12 @@ export default function App() {
     }
   };
 
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950 transition-colors duration-200">
       {/* App Header */}
       <Header
         activeTab={activeTab}
@@ -75,6 +97,8 @@ export default function App() {
         onSignOut={handleSignOut}
         soundEnabled={soundEnabled}
         setSoundEnabled={setSoundEnabled}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Main Content Body */}
@@ -122,6 +146,7 @@ export default function App() {
         user={user}
         guestName={guestName}
         setGuestName={setGuestName}
+        onSignOut={handleSignOut}
         onUserUpdated={() => {
           if (auth.currentUser) {
             setUser({ ...auth.currentUser } as User);

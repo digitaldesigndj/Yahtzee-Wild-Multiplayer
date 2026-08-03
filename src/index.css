@@ -1,13 +1,214 @@
 @import "tailwindcss";
 
 html, body {
-  background-color: #020617;
-  color: #f8fafc;
   min-height: 100%;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 button, [role="button"] {
   cursor: pointer;
+}
+
+/* Light Theme Variables */
+html.light {
+  color-scheme: light;
+  
+  /* Slate color remap for Light Mode */
+  --color-slate-950: #f8fafc; /* canvas background */
+  --color-slate-900: #ffffff; /* card / surface background */
+  --color-slate-850: #f1f5f9; /* card hover / subtle surface */
+  --color-slate-800: #e2e8f0; /* borders / dividers / secondary buttons */
+  --color-slate-700: #cbd5e1; /* border highlight */
+  --color-slate-600: #475569; /* muted text */
+  --color-slate-500: #334155; /* body secondary text */
+  --color-slate-400: #1e293b; /* subtext */
+  --color-slate-300: #0f172a; /* primary text */
+  --color-slate-200: #020617; /* heading text */
+  --color-slate-100: #000000; /* contrast bold text */
+  --color-slate-50: #f8fafc; /* light background surface */
+}
+
+/* Specific Light Mode Refinements */
+html.light {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Header, Cards, Modals in Light Mode */
+html.light header#main-header {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-bottom-color: #e2e8f0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+html.light footer {
+  background-color: #f1f5f9;
+  border-top-color: #e2e8f0;
+  color: #475569;
+}
+
+/* High Contrast Buttons & Badges in Light Mode */
+html.light .bg-white {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+html.light button.bg-emerald-500,
+html.light .bg-emerald-500 {
+  background-color: #10b981 !important;
+  color: #020617 !important;
+}
+
+/* Emerald Badges, Text & Icons in Light Mode */
+html.light .text-emerald-400,
+html.light .text-emerald-300 {
+  color: #047857 !important; /* Emerald 700 - high contrast dark green */
+}
+
+html.light .bg-emerald-950\/40,
+html.light .bg-emerald-950\/60,
+html.light .bg-emerald-950 {
+  background-color: #d1fae5 !important; /* Emerald 100 soft background */
+  color: #047857 !important;
+}
+
+html.light .border-emerald-500\/20,
+html.light .border-emerald-500\/30,
+html.light .border-emerald-500\/40,
+html.light .border-emerald-500 {
+  border-color: #10b981 !important; /* Emerald 500 border */
+}
+
+/* Map Amber Accents & Badges to Emerald Green / Blue in Light Mode */
+html.light .text-amber-300,
+html.light .text-amber-400,
+html.light .text-amber-500 {
+  color: #059669 !important; /* Emerald 600 */
+}
+
+html.light .text-amber-400\/90 {
+  color: #047857 !important;
+}
+
+html.light .bg-amber-400,
+html.light .bg-amber-500 {
+  background-color: #059669 !important; /* Emerald 600 */
+  color: #ffffff !important;
+}
+
+html.light .hover\:bg-amber-300:hover,
+html.light .hover\:bg-amber-400:hover,
+html.light .hover\:bg-amber-500:hover {
+  background-color: #047857 !important; /* Emerald 700 */
+  color: #ffffff !important;
+}
+
+html.light .bg-amber-100 {
+  background-color: #d1fae5 !important; /* Emerald 100 */
+}
+
+html.light .bg-amber-50 {
+  background-color: #ecfdf5 !important; /* Emerald 50 */
+}
+
+html.light .bg-amber-950\/30,
+html.light .bg-amber-950\/40,
+html.light .bg-amber-950\/60,
+html.light .bg-amber-500\/10,
+html.light .bg-amber-500\/15,
+html.light .bg-amber-500\/20,
+html.light .bg-amber-400\/20 {
+  background-color: #ecfdf5 !important; /* Soft Emerald surface */
+  border-color: #a7f3d0 !important;
+}
+
+html.light .border-amber-500,
+html.light .border-amber-400,
+html.light .border-amber-500\/20,
+html.light .border-amber-500\/30,
+html.light .border-amber-500\/40,
+html.light .border-amber-500\/50 {
+  border-color: #10b981 !important; /* Emerald 500 */
+}
+
+html.light .ring-amber-400,
+html.light .ring-amber-400\/20 {
+  --tw-ring-color: #10b981 !important;
+}
+
+html.light .fill-amber-400,
+html.light .fill-amber-500 {
+  fill: #059669 !important;
+}
+
+/* Transform Amber Gradients to Emerald & Blue Gradients in Light Mode */
+html.light .from-amber-400,
+html.light .from-amber-500 {
+  --tw-gradient-from: #10b981 !important;
+  --tw-gradient-to: rgb(16 185 129 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.light .to-amber-200,
+html.light .to-amber-400,
+html.light .to-amber-500,
+html.light .to-amber-700,
+html.light .to-amber-900,
+html.light .to-amber-900\/90 {
+  --tw-gradient-to: #2563eb !important; /* Blue 600 */
+}
+
+html.light .via-amber-950\/40,
+html.light .via-amber-900 {
+  --tw-gradient-via: #0d9488 !important; /* Teal 600 */
+}
+
+/* Card Gradient Overrides for Light Mode */
+html.light .from-emerald-900\/90.via-slate-900.to-amber-900\/90 {
+  background-image: linear-gradient(to right, #ecfdf5, #ffffff, #eff6ff) !important;
+  border-color: #10b981 !important;
+}
+
+html.light .from-slate-900.via-amber-950\/40.to-slate-900 {
+  background-image: linear-gradient(to right, #ffffff, #f0fdf4, #ffffff) !important;
+  border-color: #a7f3d0 !important;
+}
+
+html.light .from-amber-950\/40.via-slate-900.to-amber-950\/40 {
+  background-image: linear-gradient(to right, #f0fdf4, #ffffff, #f0fdf4) !important;
+  border-color: #a7f3d0 !important;
+}
+
+html.light .from-amber-400.to-amber-200 {
+  background-image: linear-gradient(to top right, #10b981, #3b82f6) !important;
+}
+
+/* Light Mode Card Shadows and Border Refinements */
+html.light .bg-slate-900,
+html.light .bg-slate-950 {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Ensure text inside dark surface pills remains high contrast dark in light mode */
+html.light .bg-slate-950\/80,
+html.light .bg-slate-950\/70,
+html.light .bg-slate-950\/60,
+html.light .bg-slate-950\/40 {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Modal Overlay in Light Mode */
+html.light .bg-slate-950\/80,
+html.light .bg-slate-900\/80 {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+}
+
+/* Default Dark Theme */
+html.dark, :root:not(.light) {
+  color-scheme: dark;
+  background-color: #020617;
+  color: #f8fafc;
 }
 
 @layer utilities {
@@ -21,5 +222,6 @@ button, [role="button"] {
     scrollbar-width: none;  /* Firefox */
   }
 }
+
 
 

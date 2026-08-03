@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { signInWithPopup, updateProfile, User } from 'firebase/auth';
+import { signInWithPopup, updateProfile, signOut, User } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
-import { X, UserCheck, ShieldAlert, Sparkles, User as UserIcon, Pencil, CheckCircle2 } from 'lucide-react';
+import { X, UserCheck, ShieldAlert, Sparkles, User as UserIcon, Pencil, CheckCircle2, LogOut } from 'lucide-react';
 import { sounds } from '../lib/audio';
 
 interface AuthModalProps {
@@ -11,6 +11,7 @@ interface AuthModalProps {
   guestName: string;
   setGuestName: (name: string) => void;
   onUserUpdated?: () => void;
+  onSignOut?: () => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -19,7 +20,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   user,
   guestName,
   setGuestName,
-  onUserUpdated
+  onUserUpdated,
+  onSignOut
 }) => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -177,6 +179,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               )}
             </form>
+
+            {/* Log Out Button */}
+            <button
+              type="button"
+              onClick={async () => {
+                sounds.playClickSound();
+                try {
+                  if (onSignOut) {
+                    onSignOut();
+                  } else {
+                    await signOut(auth);
+                  }
+                } catch (err) {
+                  console.error('Sign out error:', err);
+                }
+                onClose();
+              }}
+              className="w-full py-2.5 px-4 rounded-xl bg-red-950/60 hover:bg-red-900/80 border border-red-500/40 text-red-200 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+            >
+              <LogOut className="w-4 h-4 text-red-400" />
+              Log Out of Account
+            </button>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
@@ -185,7 +209,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="button"
               onClick={handleGoogleSignIn}
               disabled={isSigningIn}
-              className="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm flex items-center justify-center gap-3 shadow-lg transition-all"
+              className="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-neutral-900 font-bold text-sm flex items-center justify-center gap-3 shadow-lg transition-all cursor-pointer"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
