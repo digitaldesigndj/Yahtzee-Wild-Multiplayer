@@ -1,0 +1,6 @@
+{
+  "name": "Yahtzee",
+  "description": "Real-time multiplayer Yahtzee game with Google OAuth login and global leaderboards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

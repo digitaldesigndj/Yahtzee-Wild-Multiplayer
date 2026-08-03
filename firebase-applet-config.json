@@ -1,0 +1,12 @@
+{
+  "projectId": "yahtzee-wild",
+  "appId": "1:386384425307:web:9196ee039b6477738faa7e",
+  "apiKey": "AIzaSyDMzLBx-3DqC8Yz3urvF1MUvTK4SttEaKA",
+  "authDomain": "yahtzee-wild.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-yahtzee-3044bcae-5358-4cfe-a570-3cc9ff5fd37e",
+  "storageBucket": "yahtzee-wild.firebasestorage.app",
+  "messagingSenderId": "386384425307",
+  "measurementId": "",
+  "oAuthClientId": "386384425307-8v28svji7g1li659qufrisrblrge1paa.apps.googleusercontent.com",
+  "recaptchaSiteKey": ""
+}

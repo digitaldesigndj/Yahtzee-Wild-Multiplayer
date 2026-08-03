@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "highScores": {
+      "title": "High Scores",
+      "description": "Global leaderboard entries for Yahtzee",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "score": { "type": "number" },
+        "mode": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "userName", "score", "mode", "createdAt"]
+    },
+    "games": {
+      "title": "Multiplayer Game Rooms",
+      "description": "Real-time multiplayer lobbies and active game sessions",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "hostId": { "type": "string" },
+        "status": { "type": "string" },
+        "maxPlayers": { "type": "number" },
+        "currentTurnIndex": { "type": "number" },
+        "dice": { "type": "array" },
+        "held": { "type": "array" },
+        "rollsLeft": { "type": "number" },
+        "isRolling": { "type": "boolean" },
+        "players": { "type": "array" },
+        "scores": { "type": "object" },
+        "chat": { "type": "array" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["code", "hostId", "status", "players", "updatedAt"]
+    }
+  }
+}
