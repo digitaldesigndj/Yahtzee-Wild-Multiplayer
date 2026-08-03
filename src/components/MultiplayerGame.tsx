@@ -72,6 +72,8 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         if (data.status === 'finished' && !hasCelebratedRef.current) {
           hasCelebratedRef.current = true;
           setShowFireworks(true);
+        } else if (data.status !== 'finished') {
+          hasCelebratedRef.current = false;
         }
       } else {
         onLeaveGame();
@@ -445,14 +447,27 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onLeaveGame}
-            className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm rounded-xl shadow-lg transition-all flex items-center gap-2"
-          >
-            <RefreshCw className="w-4 h-4" /> Return to Lobbies
-          </button>
+          <div className="flex flex-wrap justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowFireworks(true)}
+              className="px-5 py-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-sm rounded-xl transition-all flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4 text-amber-400" /> Replay Victory Fireworks
+            </button>
+            <button
+              type="button"
+              onClick={onLeaveGame}
+              className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm rounded-xl shadow-lg transition-all flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" /> Return to Lobbies
+            </button>
+          </div>
         </div>
+
+        {showFireworks && (
+          <FireworksOverlay durationMs={15000} onComplete={() => setShowFireworks(false)} />
+        )}
       </div>
     );
   }
@@ -485,7 +500,7 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         </div>
 
         {/* Players Turn Trackers */}
-        <div className="flex items-center gap-2 overflow-x-auto py-1">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 max-w-full">
           {game.players.map((p, idx) => {
             const isTurn = game.currentTurnIndex === idx;
             const pScore = game.scores[p.id]?.grandTotal || 0;
@@ -493,7 +508,7 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
               <div
                 key={p.id}
                 onClick={() => setSelectedTabPlayerId(p.id)}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition-all flex items-center gap-2 ${
+                className={`px-3 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition-all flex items-center gap-2 shrink-0 whitespace-nowrap ${
                   isTurn
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/60 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
                     : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700'
@@ -525,13 +540,13 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         {/* Scorecards */}
         <div className="w-full max-w-md mx-auto flex flex-col items-center gap-4">
           {/* Player Scorecard Tab Switcher */}
-          <div className="flex gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800 w-full overflow-x-auto scrollbar-none">
+          <div className="flex gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800 w-full overflow-x-auto no-scrollbar">
             {game.players.map((p) => (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => setSelectedTabPlayerId(p.id)}
-                className={`flex-1 min-w-[64px] py-1.5 px-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all truncate ${
+                className={`flex-1 min-w-[64px] py-1.5 px-2 text-[11px] sm:text-xs font-bold rounded-lg transition-all truncate shrink-0 ${
                   displayScorePlayerId === p.id
                     ? 'bg-emerald-500 text-slate-950 shadow-md'
                     : 'text-slate-400 hover:text-slate-200'

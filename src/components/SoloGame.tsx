@@ -160,12 +160,20 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             {savedToLeaderboard && (
               <span className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 px-3 py-1.5 rounded-xl">
                 <CheckCircle className="w-4 h-4" /> Submitted to Leaderboard
               </span>
             )}
+
+            <button
+              type="button"
+              onClick={() => setShowFireworks(true)}
+              className="px-4 py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-xs flex items-center gap-1.5 transition-all"
+            >
+              <Sparkles className="w-4 h-4 text-amber-400" /> Replay Fireworks
+            </button>
 
             <button
               type="button"
