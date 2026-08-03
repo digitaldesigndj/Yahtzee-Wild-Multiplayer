@@ -93,7 +93,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="py-4 border-t border-slate-900 bg-slate-950 text-center text-xs text-slate-500">
-        <p>Yahtzee Wild &copy; 2026 • Powered by Google Firebase & React</p>
+        <p>Yahtzee Wild - Vibe Coded by <a href="https://hyprtxt.dev">Taylor</a></p>
       </footer>
 
       {/* Auth Modal */}

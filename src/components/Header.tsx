@@ -96,7 +96,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => { sounds.playClickSound(); setActiveTab('solo'); }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'solo'
                 ? 'bg-emerald-500 text-slate-950 shadow-md'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
@@ -109,7 +109,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => { sounds.playClickSound(); setActiveTab('multiplayer'); }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all relative shrink-0 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all relative shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'multiplayer'
                 ? 'bg-emerald-500 text-slate-950 shadow-md'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
@@ -123,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => { sounds.playClickSound(); setActiveTab('leaderboard'); }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'leaderboard'
                 ? 'bg-emerald-500 text-slate-950 shadow-md'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
@@ -136,7 +136,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={() => { sounds.playClickSound(); setActiveTab('rules'); }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'rules'
                 ? 'bg-emerald-500 text-slate-950 shadow-md'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'

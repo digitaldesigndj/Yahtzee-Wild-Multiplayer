@@ -9,6 +9,7 @@ import { getPlayerId } from '../lib/player';
 import { Dice3D } from './Dice3D';
 import { ScoreBoard } from './ScoreBoard';
 import { FireworksOverlay } from './FireworksOverlay';
+import { GameOverModal } from './GameOverModal';
 import { sounds } from '../lib/audio';
 import { Users, Crown, Send, Trophy, ArrowLeft, Copy, Check, MessageSquare, Sparkles, RefreshCw, Clock } from 'lucide-react';
 
@@ -30,6 +31,7 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   const [chatText, setChatText] = useState('');
   const [selectedTabPlayerId, setSelectedTabPlayerId] = useState<string | null>(null);
   const [showFireworks, setShowFireworks] = useState<boolean>(false);
+  const [showScoreModal, setShowScoreModal] = useState<boolean>(false);
   const [now, setNow] = useState<number>(Date.now());
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -68,10 +70,11 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         const data = { id: snap.id, ...snap.data() } as MultiplayerGameState;
         setGame(data);
 
-        // If game just finished, trigger fireworks once
+        // If game just finished, trigger fireworks and modal once
         if (data.status === 'finished' && !hasCelebratedRef.current) {
           hasCelebratedRef.current = true;
           setShowFireworks(true);
+          setShowScoreModal(true);
         } else if (data.status !== 'finished') {
           hasCelebratedRef.current = false;
         }
@@ -82,6 +85,16 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
 
     return () => unsub();
   }, [gameId]);
+
+  const currentPlayer = game?.players[game?.currentTurnIndex] || game?.players[0];
+  const isMyTurn = currentPlayer?.id === myId;
+
+  // Automatically switch to 'My Score' tab whenever it becomes my turn so player can immediately roll and select categories
+  useEffect(() => {
+    if (isMyTurn) {
+      setSelectedTabPlayerId(null);
+    }
+  }, [isMyTurn]);
 
   // Scroll chat box internally without moving window
   const chatBoxRef = useRef<HTMLDivElement>(null);
@@ -101,8 +114,6 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   }
 
   const isHost = game.players.length > 0 && (game.players[0].id === myId || game.hostId === myId);
-  const currentPlayer = game.players[game.currentTurnIndex] || game.players[0];
-  const isMyTurn = currentPlayer?.id === myId;
   const myScoreCard = game.scores[myId] || {};
 
   // Copy room code to clipboard
@@ -138,9 +149,12 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
     await updateDoc(doc(db, 'games', gameId), { isRolling: true });
 
     setTimeout(async () => {
+      let newlyRolledWilds = 0;
       const nextDice = game.dice.map((val, idx) => {
         if (game.held[idx] && game.rollsLeft < 3) return val;
-        return Math.random() < 0.12 ? 7 : Math.floor(Math.random() * 6) + 1;
+        const rollVal = Math.random() < 0.12 ? 7 : Math.floor(Math.random() * 6) + 1;
+        if (rollVal === 7) newlyRolledWilds++;
+        return rollVal;
       });
 
       const nextHeld = game.held.map((h, idx) => h || nextDice[idx] === 7);
@@ -149,11 +163,18 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         triggerYahtzeeConfetti();
       }
 
+      const currentScoreCard = game.scores[myId] || {};
+      const updatedMyCard = {
+        ...currentScoreCard,
+        wildDiceCount: (currentScoreCard.wildDiceCount || 0) + newlyRolledWilds
+      };
+
       await updateDoc(doc(db, 'games', gameId), {
         dice: nextDice,
         held: nextHeld,
         rollsLeft: game.rollsLeft - 1,
         isRolling: false,
+        [`scores.${myId}`]: updatedMyCard,
         updatedAt: Date.now()
       });
     }, 600);
@@ -229,18 +250,23 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         }
       });
 
-      // Save high score to Firestore leaderboard for winner
-      const winnerPlayer = game.players.find(p => p.id === winnerId);
-      if (winnerPlayer) {
+      // Save high scores to Firestore leaderboard for all players
+      game.players.forEach((player) => {
+        const pCard = updatedScores[player.id] || {};
+        const pScore = pCard.grandTotal || 0;
+        const pYahtzees = (pCard.yahtzee === 50 ? 1 : 0) + (pCard.yahtzeeBonusCount || 0);
+
         addDoc(collection(db, 'highScores'), {
-          userId: winnerPlayer.id,
-          userName: winnerPlayer.name,
-          userPhoto: winnerPlayer.photoURL || '',
-          score: highestScore,
+          userId: player.id,
+          userName: player.name,
+          userPhoto: player.photoURL || '',
+          score: pScore,
           mode: 'multiplayer',
+          wildDiceCount: pCard.wildDiceCount || 0,
+          yahtzeesCount: pYahtzees,
           createdAt: new Date().toISOString()
         }).catch(err => console.error('Error saving multiplayer high score:', err));
-      }
+      });
     }
 
     const updatePayload: Record<string, any> = {
@@ -251,6 +277,7 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       rollsLeft: 3,
       held: [false, false, false, false, false],
       dice: [1, 2, 3, 4, 5],
+      isRolling: false,
       updatedAt: Date.now()
     };
 
@@ -450,10 +477,10 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
           <div className="flex flex-wrap justify-center gap-3">
             <button
               type="button"
-              onClick={() => setShowFireworks(true)}
-              className="px-5 py-3 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-sm rounded-xl transition-all flex items-center gap-2"
+              onClick={() => setShowScoreModal(true)}
+              className="px-5 py-3 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold text-sm rounded-xl transition-all flex items-center gap-2"
             >
-              <Sparkles className="w-4 h-4 text-amber-400" /> Replay Victory Fireworks
+              <Trophy className="w-4 h-4 text-emerald-400" /> View Score Popup
             </button>
             <button
               type="button"
@@ -464,6 +491,22 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
             </button>
           </div>
         </div>
+
+        <GameOverModal
+          isOpen={showScoreModal}
+          onClose={() => setShowScoreModal(false)}
+          mode="multiplayer"
+          winnerName={winner?.name}
+          playersStandings={sortedPlayers.map((p, idx) => ({
+            id: p.id,
+            name: p.name,
+            score: game.scores[p.id]?.grandTotal || 0,
+            upperBonus: game.scores[p.id]?.upperBonus,
+            isWinner: idx === 0,
+            isMe: p.id === myId,
+          }))}
+          onPlayAgain={onLeaveGame}
+        />
 
         {showFireworks && (
           <FireworksOverlay durationMs={15000} onComplete={() => setShowFireworks(false)} />
@@ -535,10 +578,10 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         />
       </div>
 
-      {/* Main Content (Scorecard & Chat) - Scrolls under roll box */}
-      <div className="w-full flex flex-col lg:flex-row gap-6 items-start justify-center">
+      {/* Main Content (Scorecard & Chat) - Single Column Layout */}
+      <div className="w-full max-w-md mx-auto flex flex-col gap-6 items-center">
         {/* Scorecards */}
-        <div className="w-full max-w-md mx-auto flex flex-col items-center gap-4">
+        <div className="w-full flex flex-col items-center gap-4">
           {/* Player Scorecard Tab Switcher */}
           <div className="flex gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800 w-full overflow-x-auto no-scrollbar">
             {game.players.map((p) => (
@@ -569,7 +612,7 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
         </div>
 
         {/* Live Chat & Reactions Box */}
-        <div className="w-full lg:max-w-xs bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3 backdrop-blur-md">
+        <div className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3 backdrop-blur-md">
           <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-emerald-400" /> Live Match Chat & Reactions
           </h4>

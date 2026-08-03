@@ -289,7 +289,7 @@ export const FireworksOverlay: React.FC<FireworksOverlayProps> = ({
 
       <div className="relative z-10 text-center pointer-events-none mb-6">
         <span className="inline-block bg-slate-900/90 text-amber-300 font-extrabold text-sm md:text-base px-5 py-2.5 rounded-full border border-amber-500/50 shadow-2xl backdrop-blur animate-bounce tracking-wide">
-          🎆 Grand Victory Fireworks Show! 🎆
+          🎆 Good Game! 🎆
         </span>
       </div>
     </div>

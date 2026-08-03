@@ -1,8 +1,8 @@
 import React from 'react';
 import { CategoryKey, ScoreCard } from '../types/yahtzee';
-import { CATEGORY_LABELS, calculateCategoryScore } from '../lib/yahtzeeLogic';
+import { CATEGORY_LABELS, calculateCategoryScore, isYahtzee } from '../lib/yahtzeeLogic';
 import { sounds } from '../lib/audio';
-import { CheckCircle2, Award, Sparkles } from 'lucide-react';
+import { CheckCircle2, Award, Sparkles, Dices } from 'lucide-react';
 
 interface ScoreBoardProps {
   scoreCard: ScoreCard;
@@ -38,6 +38,7 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({
   const upperSubtotal = scoreCard.upperSubtotal || 0;
   const upperBonus = scoreCard.upperBonus || 0;
   const pointsToBonus = Math.max(0, 63 - upperSubtotal);
+  const isYahtzeeBonusEligible = hasRolled && isYahtzee(dice) && scoreCard.yahtzee === 50;
 
   const renderCategoryRow = (cat: CategoryKey) => {
     const isScored = typeof scoreCard[cat] === 'number';
@@ -145,18 +146,44 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({
             </tr>
             {lowerCategories.map(renderCategoryRow)}
 
-            {/* Yahtzee Bonus Count */}
-            {(scoreCard.yahtzeeBonusCount || 0) > 0 && (
-              <tr className="bg-amber-950/30 border-t border-amber-500/30">
-                <td className="py-2 px-3 text-xs font-bold text-amber-400 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 inline" />
-                  Bonus Yahtzee ({scoreCard.yahtzeeBonusCount}x)
-                </td>
-                <td className="py-2 px-3 text-right font-bold text-amber-400 text-xs sm:text-sm font-mono">
-                  +{(scoreCard.yahtzeeBonusCount || 0) * 100}
-                </td>
-              </tr>
-            )}
+            {/* Permanent Bonus Yahtzee Tracker */}
+            <tr className={`border-t border-b border-slate-800/80 transition-all ${
+              (scoreCard.yahtzeeBonusCount || 0) > 0
+                ? 'bg-amber-950/30'
+                : isYahtzeeBonusEligible
+                ? 'bg-amber-500/15 border-amber-500/50 animate-pulse'
+                : 'bg-slate-950/40'
+            }`}>
+              <td className="py-2.5 px-3 font-medium text-xs sm:text-sm">
+                <div className="flex flex-col">
+                  <span className="font-bold text-amber-300 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    Bonus Yahtzee
+                    {(scoreCard.yahtzeeBonusCount || 0) > 0 && (
+                      <span className="bg-amber-400 text-slate-950 font-black text-[10px] px-1.5 py-0.2 rounded-full">
+                        {scoreCard.yahtzeeBonusCount}x
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {isYahtzeeBonusEligible ? (
+                      <span className="text-amber-300 font-bold">★ Bonus Yahtzee rolled! Select any open box to claim +100 bonus pts!</span>
+                    ) : (
+                      '100 pts for each additional Yahtzee'
+                    )}
+                  </span>
+                </div>
+              </td>
+              <td className="py-2.5 px-3 text-right font-mono">
+                <span className={`text-xs sm:text-sm font-bold ${
+                  (scoreCard.yahtzeeBonusCount || 0) > 0 ? 'text-amber-400 font-black text-sm sm:text-base' : 'text-slate-500'
+                }`}>
+                  {(scoreCard.yahtzeeBonusCount || 0) > 0
+                    ? `+${(scoreCard.yahtzeeBonusCount || 0) * 100}`
+                    : '0 pts'}
+                </span>
+              </td>
+            </tr>
 
             {/* Grand Total Footer */}
             <tr className="bg-gradient-to-r from-emerald-950/80 to-slate-900 border-t-2 border-emerald-500/50">

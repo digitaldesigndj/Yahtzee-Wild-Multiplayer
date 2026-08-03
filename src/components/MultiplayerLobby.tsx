@@ -218,10 +218,10 @@ export const MultiplayerLobby: React.FC<MultiplayerLobbyProps> = ({
         </div>
       )}
 
-      {/* Main Grid: Create/Join & Active Lobbies */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        {/* Left Column: Create Room & Join Code */}
-        <div className="md:col-span-5 flex flex-col gap-6">
+      {/* Single Column Layout: Host/Join & Active Lobbies */}
+      <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full">
+        {/* Host Room & Join Code */}
+        <div className="flex flex-col gap-6 w-full">
           {/* Create Room Box */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
             <h3 className="text-base font-extrabold text-slate-200 flex items-center gap-2">
@@ -286,8 +286,8 @@ export const MultiplayerLobby: React.FC<MultiplayerLobbyProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Public Open Rooms */}
-        <div className="md:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
+        {/* Public Open Rooms */}
+        <div className="w-full bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col gap-4">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <h3 className="text-base font-extrabold text-slate-200 flex items-center gap-2">
               <Users className="w-5 h-5 text-emerald-400" /> Public Waiting Rooms ({activeLobbies.length})

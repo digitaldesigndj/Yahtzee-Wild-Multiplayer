@@ -8,8 +8,9 @@ import { triggerYahtzeeConfetti } from '../lib/confetti';
 import { Dice3D } from './Dice3D';
 import { ScoreBoard } from './ScoreBoard';
 import { FireworksOverlay } from './FireworksOverlay';
+import { GameOverModal } from './GameOverModal';
 import { sounds } from '../lib/audio';
-import { Trophy, RefreshCw, Sparkles, CheckCircle } from 'lucide-react';
+import { Trophy, RefreshCw, Sparkles, CheckCircle, Award } from 'lucide-react';
 
 interface SoloGameProps {
   user: User | null;
@@ -25,6 +26,7 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
   const [scoreCard, setScoreCard] = useState<ScoreCard>({});
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [showFireworks, setShowFireworks] = useState<boolean>(false);
+  const [showScoreModal, setShowScoreModal] = useState<boolean>(false);
   const [savedToLeaderboard, setSavedToLeaderboard] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
@@ -34,12 +36,22 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
 
     setIsRolling(true);
     setTimeout(() => {
+      let newlyRolledWilds = 0;
       const nextDice = dice.map((val, idx) => {
         if (held[idx] && rollsLeft < 3) return val;
-        return Math.random() < 0.12 ? 7 : Math.floor(Math.random() * 6) + 1;
+        const rollVal = Math.random() < 0.12 ? 7 : Math.floor(Math.random() * 6) + 1;
+        if (rollVal === 7) newlyRolledWilds++;
+        return rollVal;
       });
 
       const nextHeld = held.map((h, idx) => h || nextDice[idx] === 7);
+
+      if (newlyRolledWilds > 0) {
+        setScoreCard(prev => ({
+          ...prev,
+          wildDiceCount: (prev.wildDiceCount || 0) + newlyRolledWilds
+        }));
+      }
 
       setDice(nextDice);
       setHeld(nextHeld);
@@ -93,26 +105,31 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
     if (isScoreCardFinished(updatedCard)) {
       setIsFinished(true);
       setShowFireworks(true);
+      setShowScoreModal(true);
 
       // Auto save to Firestore leaderboard
-      await saveScoreToLeaderboard(updatedCard.grandTotal || 0);
+      await saveScoreToLeaderboard(updatedCard);
     }
   };
 
   // Save final score to Firestore
-  const saveScoreToLeaderboard = async (finalScore: number) => {
+  const saveScoreToLeaderboard = async (finalCard: ScoreCard) => {
     try {
       setIsSaving(true);
       const entryName = user ? (user.displayName || 'Player') : guestName;
       const entryPhoto = user?.photoURL || '';
       const userId = user?.uid || `guest_${Date.now()}`;
 
+      const yahtzeesScored = (finalCard.yahtzee === 50 ? 1 : 0) + (finalCard.yahtzeeBonusCount || 0);
+
       await addDoc(collection(db, 'highScores'), {
         userId,
         userName: entryName,
         userPhoto: entryPhoto,
-        score: finalScore,
+        score: finalCard.grandTotal || 0,
         mode: 'solo',
+        wildDiceCount: finalCard.wildDiceCount || 0,
+        yahtzeesCount: yahtzeesScored,
         createdAt: new Date().toISOString()
       });
 
@@ -134,6 +151,7 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
     setScoreCard({});
     setIsFinished(false);
     setShowFireworks(false);
+    setShowScoreModal(false);
     setSavedToLeaderboard(false);
   };
 
@@ -169,10 +187,10 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
 
             <button
               type="button"
-              onClick={() => setShowFireworks(true)}
-              className="px-4 py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-xs flex items-center gap-1.5 transition-all"
+              onClick={() => setShowScoreModal(true)}
+              className="px-4 py-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold text-xs flex items-center gap-1.5 transition-all"
             >
-              <Sparkles className="w-4 h-4 text-amber-400" /> Replay Fireworks
+              <Trophy className="w-4 h-4 text-emerald-400" /> View Score Popup
             </button>
 
             <button
@@ -199,9 +217,9 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
         />
       </div>
 
-      {/* Scorecard & Tips - Scrolls underneath roll box */}
-      <div className="w-full flex flex-col lg:flex-row gap-6 items-start justify-center">
-        <div className="w-full max-w-md mx-auto flex justify-center">
+      {/* Scorecard & Tips - Single Column Layout */}
+      <div className="w-full max-w-md mx-auto flex flex-col gap-6 items-center">
+        <div className="w-full flex justify-center">
           <ScoreBoard
             scoreCard={scoreCard}
             dice={dice}
@@ -214,7 +232,7 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
         </div>
 
         {/* Quick tips card */}
-        <div className="w-full lg:max-w-xs flex flex-col gap-4">
+        <div className="w-full flex flex-col gap-4">
           <div className="w-full bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-slate-400 text-xs flex flex-col gap-3 shadow-lg backdrop-blur-md">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-emerald-400 flex-shrink-0" />
@@ -233,6 +251,17 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
           </div>
         </div>
       </div>
+
+      <GameOverModal
+        isOpen={showScoreModal}
+        onClose={() => setShowScoreModal(false)}
+        mode="solo"
+        playerName={user ? user.displayName || 'Player' : guestName}
+        scoreCard={scoreCard}
+        savedToLeaderboard={savedToLeaderboard}
+        isSavingLeaderboard={isSaving}
+        onPlayAgain={handleNewGame}
+      />
 
       {showFireworks && (
         <FireworksOverlay durationMs={15000} onComplete={() => setShowFireworks(false)} />

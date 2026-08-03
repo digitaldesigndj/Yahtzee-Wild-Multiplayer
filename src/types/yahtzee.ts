@@ -32,6 +32,7 @@ export interface ScoreCard {
   yahtzee?: number;
   chance?: number;
   yahtzeeBonusCount?: number;
+  wildDiceCount?: number;
   lowerTotal?: number;
   
   grandTotal?: number;
@@ -81,6 +82,8 @@ export interface HighScoreEntry {
   userPhoto?: string;
   score: number;
   mode: 'solo' | 'multiplayer';
+  wildDiceCount?: number;
+  yahtzeesCount?: number;
   createdAt: string;
 }
 

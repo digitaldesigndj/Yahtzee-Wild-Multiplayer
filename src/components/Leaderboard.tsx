@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { HighScoreEntry } from '../types/yahtzee';
-import { Trophy, Medal, Crown, Calendar, User, Sparkles } from 'lucide-react';
+import { Trophy, Medal, Crown, Calendar, User, Sparkles, Dices, Star } from 'lucide-react';
 
 export const Leaderboard: React.FC = () => {
   const [scores, setScores] = useState<HighScoreEntry[]>([]);
@@ -92,8 +92,10 @@ export const Leaderboard: React.FC = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-800 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 bg-slate-950/40">
-                  <th className="py-2 px-2 sm:py-3 sm:px-4 w-12 sm:w-16">Rank</th>
+                  <th className="py-2 px-2 sm:py-3 sm:px-4 w-10 sm:w-16">Rank</th>
                   <th className="py-2 px-2 sm:py-3 sm:px-4">Player</th>
+                  <th className="py-2 px-2 sm:py-3 sm:px-4 text-center">Wilds</th>
+                  <th className="py-2 px-2 sm:py-3 sm:px-4 text-center">Yahtzees</th>
                   <th className="py-2 px-2 sm:py-3 sm:px-4 hidden sm:table-cell">Mode</th>
                   <th className="py-2 px-2 sm:py-3 sm:px-4 hidden sm:table-cell">Date</th>
                   <th className="py-2 px-2 sm:py-3 sm:px-4 text-right">Score</th>
@@ -168,6 +170,22 @@ export const Leaderboard: React.FC = () => {
                             </span>
                           </div>
                         </div>
+                      </td>
+
+                      {/* Wild Dice Rolled */}
+                      <td className="py-2.5 px-2 sm:py-3.5 sm:px-4 text-center">
+                        <span className="inline-flex items-center justify-center gap-1 font-mono font-bold text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                          <Dices className="w-3 h-3 text-emerald-400 shrink-0" />
+                          {entry.wildDiceCount ?? 0}
+                        </span>
+                      </td>
+
+                      {/* Yahtzees Scored */}
+                      <td className="py-2.5 px-2 sm:py-3.5 sm:px-4 text-center">
+                        <span className="inline-flex items-center justify-center gap-1 font-mono font-bold text-xs text-amber-400 bg-amber-950/40 border border-amber-500/20 px-2 py-0.5 rounded-md">
+                          <Sparkles className="w-3 h-3 text-amber-400 shrink-0" />
+                          {entry.yahtzeesCount ?? 0}
+                        </span>
                       </td>
 
                       {/* Mode (Desktop) */}

@@ -20,8 +20,8 @@ export const HowToPlay: React.FC = () => {
         </div>
       </div>
 
-      {/* Mechanics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Mechanics Single Column */}
+      <div className="flex flex-col gap-4">
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 flex flex-col gap-2">
           <div className="w-8 h-8 rounded-xl bg-emerald-950 text-emerald-400 flex items-center justify-center font-bold">
             <Dices className="w-4 h-4" />
@@ -53,13 +53,38 @@ export const HowToPlay: React.FC = () => {
         </div>
       </div>
 
+      {/* Bonus Yahtzee & Joker Rules Card */}
+      <div className="bg-gradient-to-r from-amber-950/40 via-slate-900 to-amber-950/40 border border-amber-500/40 rounded-2xl p-6 shadow-xl flex flex-col gap-3">
+        <div className="flex items-center gap-2 text-amber-400 font-extrabold text-base">
+          <Sparkles className="w-5 h-5 text-amber-400" />
+          <span>Bonus Yahtzee & Joker Rules</span>
+        </div>
+        <p className="text-xs text-slate-300 leading-relaxed">
+          Rolling more than one Yahtzee in a game unlocks massive bonus points and flexible scoring!
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs">
+          <div className="bg-slate-950/70 p-3.5 rounded-xl border border-amber-500/20 flex flex-col gap-1">
+            <span className="font-bold text-amber-300">★ +100 Point Bonus</span>
+            <p className="text-slate-400 text-[11px] leading-relaxed">
+              If you roll a 5-of-a-kind AFTER already scoring 50 points in your Yahtzee box, you automatically receive a <b>+100 point Bonus Yahtzee</b> for every additional Yahtzee!
+            </p>
+          </div>
+          <div className="bg-slate-950/70 p-3.5 rounded-xl border border-amber-500/20 flex flex-col gap-1">
+            <span className="font-bold text-amber-300">🃏 Joker Rule Scoring</span>
+            <p className="text-slate-400 text-[11px] leading-relaxed">
+              When scoring a Bonus Yahtzee, you can use it in any open category box. If placed in Full House, Small Straight, or Large Straight, you automatically receive full points (25, 30, or 40 pts)!
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Category Breakdown Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col gap-4">
         <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
           <CheckCircle2 className="w-5 h-5 text-emerald-400" /> Complete Category Reference
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
           {/* Upper section */}
           <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 flex flex-col gap-2">
             <span className="text-xs font-black uppercase text-emerald-400 border-b border-slate-800 pb-2">
