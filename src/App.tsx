@@ -14,10 +14,29 @@ import { MultiplayerGame } from './components/MultiplayerGame';
 import { Leaderboard } from './components/Leaderboard';
 import { HowToPlay } from './components/HowToPlay';
 import { AuthModal } from './components/AuthModal';
+import { generateDefaultGuestName } from './lib/player';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
-  const [guestName, setGuestName] = useState<string>('WildPlayer');
+  const [guestName, setGuestNameState] = useState<string>(() => {
+    let stored = sessionStorage.getItem('yahtzee_guest_name');
+    if (stored && stored.startsWith('WildPlayer ')) {
+      stored = stored.replace('WildPlayer ', '');
+      sessionStorage.setItem('yahtzee_guest_name', stored);
+    } else if (stored === 'WildPlayer') {
+      stored = generateDefaultGuestName();
+      sessionStorage.setItem('yahtzee_guest_name', stored);
+    }
+    if (stored) return stored;
+    const defaultName = generateDefaultGuestName();
+    sessionStorage.setItem('yahtzee_guest_name', defaultName);
+    return defaultName;
+  });
+
+  const setGuestName = (name: string) => {
+    sessionStorage.setItem('yahtzee_guest_name', name);
+    setGuestNameState(name);
+  };
   const [activeTab, setActiveTab] = useState<ActiveTab>('solo');
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
