@@ -32,8 +32,12 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="w-full lg:w-auto flex items-center justify-between gap-2 shrink-0">
           {/* Brand logo */}
           <div className="flex items-center gap-2.5 cursor-pointer shrink-0" onClick={() => setActiveTab('solo')}>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Dices className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950 stroke-[2.5]" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 flex items-center justify-center shadow-lg shadow-emerald-500/20 overflow-hidden shrink-0">
+              <img
+                src="/android/icon-192.png"
+                alt="Yahtzee Wild App Icon"
+                className="w-full h-full object-cover rounded-[10px]"
+              />
             </div>
             <div>
               <h1 className="text-base sm:text-lg md:text-xl font-black tracking-wider text-slate-100 uppercase flex items-center gap-1">
