@@ -186,9 +186,9 @@ export const ScoreBoard: React.FC<ScoreBoardProps> = ({
             </tr>
 
             {/* Grand Total Footer */}
-            <tr className="bg-gradient-to-r from-emerald-950/80 to-slate-900 border-t-2 border-emerald-500/50">
-              <td className="py-3 px-3 text-sm font-black text-emerald-400 uppercase tracking-wider">Grand Total</td>
-              <td className="py-3 px-3 text-right text-xl font-black text-amber-400 font-mono">
+            <tr className="bg-sky-100 dark:bg-emerald-950/80 border-t-2 border-blue-300 dark:border-emerald-500/50">
+              <td className="py-3 px-3 text-sm font-black text-blue-950 dark:text-emerald-400 uppercase tracking-wider">Grand Total</td>
+              <td className="py-3 px-3 text-right text-xl font-black text-blue-950 dark:text-amber-400 font-mono">
                 {scoreCard.grandTotal || 0}
               </td>
             </tr>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { CATEGORY_LABELS } from '../lib/yahtzeeLogic';
-import { HelpCircle, Sparkles, Award, Dices, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { HelpCircle, Sparkles, Award, Dices, RotateCcw, CheckCircle2, Keyboard } from 'lucide-react';
 
 export const HowToPlay: React.FC = () => {
   return (
@@ -74,6 +74,31 @@ export const HowToPlay: React.FC = () => {
             <p className="text-slate-400 text-[11px] leading-relaxed">
               When scoring a Bonus Yahtzee, you can use it in any open category box. If placed in Full House, Small Straight, or Large Straight, you automatically receive full points (25, 30, or 40 pts)!
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Keyboard Controls Card */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col gap-3">
+        <div className="flex items-center gap-2 text-emerald-400 font-extrabold text-base">
+          <Keyboard className="w-5 h-5 text-emerald-400" />
+          <span>Keyboard Controls & Shortcuts</span>
+        </div>
+        <p className="text-xs text-slate-300 leading-relaxed">
+          Speed up your gameplay with these handy hotkeys:
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
+          <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-3">
+            <span className="text-slate-300 font-medium">Roll Active Dice</span>
+            <kbd className="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-md text-emerald-400 font-mono text-xs font-bold shadow-sm">
+              Spacebar
+            </kbd>
+          </div>
+          <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-3">
+            <span className="text-slate-300 font-medium">Toggle Hold Dice #1 to #5</span>
+            <kbd className="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-md text-amber-400 font-mono text-xs font-bold shadow-sm">
+              Keys 1 - 5
+            </kbd>
           </div>
         </div>
       </div>

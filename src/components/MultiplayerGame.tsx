@@ -18,13 +18,15 @@ interface MultiplayerGameProps {
   user: User | null;
   guestName: string;
   onLeaveGame: () => void;
+  onOpenLeaderboard?: () => void;
 }
 
 export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   gameId,
   user,
   guestName,
-  onLeaveGame
+  onLeaveGame,
+  onOpenLeaderboard
 }) => {
   const [game, setGame] = useState<MultiplayerGameState | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -506,6 +508,7 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
             isMe: p.id === myId,
           }))}
           onPlayAgain={onLeaveGame}
+          onViewLeaderboard={onOpenLeaderboard}
         />
 
         {showFireworks && (

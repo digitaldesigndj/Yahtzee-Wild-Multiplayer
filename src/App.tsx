@@ -108,6 +108,7 @@ export default function App() {
             user={user}
             guestName={guestName}
             onOpenAuthModal={() => setIsAuthModalOpen(true)}
+            onOpenLeaderboard={() => setActiveTab('leaderboard')}
           />
         )}
 
@@ -126,6 +127,7 @@ export default function App() {
             user={user}
             guestName={guestName}
             onLeaveGame={() => setActiveGameId(null)}
+            onOpenLeaderboard={() => setActiveTab('leaderboard')}
           />
         )}
 

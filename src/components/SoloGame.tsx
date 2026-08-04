@@ -16,9 +16,10 @@ interface SoloGameProps {
   user: User | null;
   guestName: string;
   onOpenAuthModal: () => void;
+  onOpenLeaderboard?: () => void;
 }
 
-export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthModal }) => {
+export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthModal, onOpenLeaderboard }) => {
   const [dice, setDice] = useState<number[]>([1, 2, 3, 4, 5]);
   const [held, setHeld] = useState<boolean[]>([false, false, false, false, false]);
   const [rollsLeft, setRollsLeft] = useState<number>(3);
@@ -261,6 +262,7 @@ export const SoloGame: React.FC<SoloGameProps> = ({ user, guestName, onOpenAuthM
         savedToLeaderboard={savedToLeaderboard}
         isSavingLeaderboard={isSaving}
         onPlayAgain={handleNewGame}
+        onViewLeaderboard={onOpenLeaderboard}
       />
 
       {showFireworks && (

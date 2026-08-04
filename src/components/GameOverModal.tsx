@@ -23,6 +23,8 @@ interface GameOverModalProps {
   savedToLeaderboard?: boolean;
   isSavingLeaderboard?: boolean;
   onPlayAgain: () => void;
+  onViewLeaderboard?: () => void;
+  onReplayFireworks?: () => void;
 }
 
 export const GameOverModal: React.FC<GameOverModalProps> = ({
@@ -37,6 +39,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   savedToLeaderboard,
   isSavingLeaderboard,
   onPlayAgain,
+  onViewLeaderboard,
   onReplayFireworks,
 }) => {
   if (!isOpen) return null;
@@ -184,16 +187,30 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-700"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-slate-300 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-700 cursor-pointer"
           >
             <Eye className="w-4 h-4 text-slate-400" />
             Review Board
           </button>
 
+          {onViewLeaderboard && (
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                onViewLeaderboard();
+              }}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-amber-500/40 cursor-pointer"
+            >
+              <Trophy className="w-4 h-4 text-amber-400" />
+              View Leaderboard
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onPlayAgain}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all shrink-0"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all shrink-0 cursor-pointer"
           >
             <RefreshCw className="w-4 h-4" />
             {mode === 'solo' ? 'Play Again' : 'Return to Lobbies'}
