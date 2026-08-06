@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { doc, onSnapshot, updateDoc, collection, addDoc, deleteDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, collection, addDoc, deleteDoc, arrayUnion } from 'firebase/firestore';
 import { User } from 'firebase/auth';
 import { db } from '../lib/firebase';
 import { MultiplayerGameState, CategoryKey, ScoreCard, ChatMessage } from '../types/yahtzee';
@@ -39,6 +39,12 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
 
   const myId = getPlayerId(user, guestName);
 
+  // Keep a ref to the latest game state to avoid stale closure references in async handlers
+  const gameRef = useRef<MultiplayerGameState | null>(game);
+  useEffect(() => {
+    gameRef.current = game;
+  }, [game]);
+
   // 15-minute room expiration check while in lobby
   useEffect(() => {
     if (!game || game.status !== 'lobby') return;
@@ -71,6 +77,7 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       if (snap.exists()) {
         const data = { id: snap.id, ...snap.data() } as MultiplayerGameState;
         setGame(data);
+        gameRef.current = data;
 
         // If game just finished, trigger fireworks and modal once
         if (data.status === 'finished' && !hasCelebratedRef.current) {
@@ -130,6 +137,17 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
   const handleStartGame = async () => {
     if (!isHost) return;
     sounds.playScoreSound();
+
+    setGame(prev => prev ? {
+      ...prev,
+      status: 'playing',
+      currentTurnIndex: 0,
+      round: 1,
+      rollsLeft: 3,
+      dice: [1, 2, 3, 4, 5],
+      held: [false, false, false, false, false],
+    } : null);
+
     await updateDoc(doc(db, 'games', gameId), {
       status: 'playing',
       currentTurnIndex: 0,
@@ -138,92 +156,129 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       dice: [1, 2, 3, 4, 5],
       held: [false, false, false, false, false],
       updatedAt: Date.now()
-    });
+    }).catch(err => console.error('Error starting game:', err));
   };
 
   // Roll dice in multiplayer
   const handleRollDice = async () => {
-    if (!isMyTurn || game.rollsLeft <= 0 || game.isRolling) return;
+    const currentGame = gameRef.current || game;
+    if (!currentGame) return;
+
+    const turnPlayer = currentGame.players[currentGame.currentTurnIndex] || currentGame.players[0];
+    const myTurn = turnPlayer?.id === myId;
+    if (!myTurn || currentGame.rollsLeft <= 0 || currentGame.isRolling) return;
 
     sounds.playRollSound();
 
-    // Set rolling status for all players to see animation
-    await updateDoc(doc(db, 'games', gameId), { isRolling: true });
+    // Optimistically set rolling status locally for immediate feedback
+    setGame(prev => prev ? { ...prev, isRolling: true } : null);
+
+    // Set rolling status in Firestore for other players to see animation
+    await updateDoc(doc(db, 'games', gameId), { isRolling: true, updatedAt: Date.now() })
+      .catch(err => console.error('Error setting isRolling:', err));
 
     setTimeout(async () => {
+      const latestGame = gameRef.current || currentGame;
       let newlyRolledWilds = 0;
-      const nextDice = game.dice.map((val, idx) => {
-        if (game.held[idx] && game.rollsLeft < 3) return val;
+      const nextDice = latestGame.dice.map((val, idx) => {
+        if (latestGame.held[idx] && latestGame.rollsLeft < 3) return val;
         const rollVal = Math.random() < 0.12 ? 7 : Math.floor(Math.random() * 6) + 1;
         if (rollVal === 7) newlyRolledWilds++;
         return rollVal;
       });
 
-      const nextHeld = game.held.map((h, idx) => h || nextDice[idx] === 7);
+      const nextHeld = latestGame.held.map((h, idx) => h || nextDice[idx] === 7);
 
       if (isYahtzee(nextDice)) {
         triggerYahtzeeConfetti();
       }
 
-      const currentScoreCard = game.scores[myId] || {};
+      const currentScoreCard = latestGame.scores[myId] || {};
       const updatedMyCard = {
         ...currentScoreCard,
         wildDiceCount: (currentScoreCard.wildDiceCount || 0) + newlyRolledWilds
       };
 
+      // Optimistically update local game state
+      setGame(prev => prev ? {
+        ...prev,
+        dice: nextDice,
+        held: nextHeld,
+        rollsLeft: latestGame.rollsLeft - 1,
+        isRolling: false,
+        scores: {
+          ...prev.scores,
+          [myId]: updatedMyCard
+        }
+      } : null);
+
       await updateDoc(doc(db, 'games', gameId), {
         dice: nextDice,
         held: nextHeld,
-        rollsLeft: game.rollsLeft - 1,
+        rollsLeft: latestGame.rollsLeft - 1,
         isRolling: false,
         [`scores.${myId}`]: updatedMyCard,
         updatedAt: Date.now()
-      });
+      }).catch(err => console.error('Error updating roll:', err));
     }, 600);
   };
 
   // Toggle hold in multiplayer
   const handleToggleHold = async (idx: number) => {
-    if (!isMyTurn || game.rollsLeft === 3 || game.isRolling) return;
-    if (game.dice[idx] === 7) return;
+    const currentGame = gameRef.current || game;
+    if (!currentGame) return;
+
+    const turnPlayer = currentGame.players[currentGame.currentTurnIndex] || currentGame.players[0];
+    const myTurn = turnPlayer?.id === myId;
+    if (!myTurn || currentGame.rollsLeft === 3 || currentGame.isRolling) return;
+    if (currentGame.dice[idx] === 7) return;
     sounds.playClickSound();
 
-    const nextHeld = [...game.held];
+    const nextHeld = [...currentGame.held];
     nextHeld[idx] = !nextHeld[idx];
+
+    // Optimistic local update
+    setGame(prev => prev ? { ...prev, held: nextHeld } : null);
 
     await updateDoc(doc(db, 'games', gameId), {
       held: nextHeld,
       updatedAt: Date.now()
-    });
+    }).catch(err => console.error('Error toggling hold:', err));
   };
 
   // Select score category in multiplayer
   const handleSelectCategory = async (category: CategoryKey) => {
-    if (!isMyTurn || game.rollsLeft === 3 || game.isRolling) return;
+    const currentGame = gameRef.current || game;
+    if (!currentGame) return;
 
-    const points = calculateCategoryScore(category, game.dice, myScoreCard);
+    const turnPlayer = currentGame.players[currentGame.currentTurnIndex] || currentGame.players[0];
+    const myTurn = turnPlayer?.id === myId;
+    if (!myTurn || currentGame.rollsLeft === 3) return;
 
-    let nextYahtzeeBonus = myScoreCard.yahtzeeBonusCount || 0;
-    const isYahtzeeRoll = isYahtzee(game.dice);
-    if (isYahtzeeRoll && myScoreCard.yahtzee === 50 && category !== 'yahtzee') {
+    const currentCard = currentGame.scores[myId] || {};
+    const points = calculateCategoryScore(category, currentGame.dice, currentCard);
+
+    let nextYahtzeeBonus = currentCard.yahtzeeBonusCount || 0;
+    const isYahtzeeRoll = isYahtzee(currentGame.dice);
+    if (isYahtzeeRoll && currentCard.yahtzee === 50 && category !== 'yahtzee') {
       nextYahtzeeBonus++;
     }
 
     const nextCard: ScoreCard = {
-      ...myScoreCard,
+      ...currentCard,
       [category]: points,
       yahtzeeBonusCount: nextYahtzeeBonus
     };
 
     const updatedCard = updateScoreCardTotals(nextCard);
     const updatedScores = {
-      ...game.scores,
+      ...currentGame.scores,
       [myId]: updatedCard
     };
 
     // Calculate turn progression (alternate turns)
-    const nextTurnIndex = (game.currentTurnIndex + 1) % game.players.length;
-    let nextRound = game.round;
+    const nextTurnIndex = (currentGame.currentTurnIndex + 1) % currentGame.players.length;
+    let nextRound = currentGame.round;
     if (nextTurnIndex === 0) {
       nextRound += 1;
     }
@@ -231,19 +286,19 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
     // Reset scorecard view selection so next turn player's scorecard shows automatically
     setSelectedTabPlayerId(null);
 
-    // Check if game has concluded for all players (all players complete all 13 rounds)
-    const allFinished = game.players.every((p) => {
+    // Check if game has concluded for all players
+    const allFinished = currentGame.players.every((p) => {
       const pCard = updatedScores[p.id] || {};
       return isScoreCardFinished(pCard);
     });
 
-    let winnerId: string | undefined = game.winnerId;
-    let newStatus = game.status;
+    let winnerId: string | undefined = currentGame.winnerId;
+    let newStatus = currentGame.status;
 
     if (allFinished || nextRound > 13) {
       newStatus = 'finished';
       let highestScore = -1;
-      game.players.forEach((p) => {
+      currentGame.players.forEach((p) => {
         const sc = updatedScores[p.id] || {};
         const total = sc.grandTotal || 0;
         if (total > highestScore) {
@@ -253,7 +308,7 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       });
 
       // Save high scores to Firestore leaderboard for all players
-      game.players.forEach((player) => {
+      currentGame.players.forEach((player) => {
         const pCard = updatedScores[player.id] || {};
         const pScore = pCard.grandTotal || 0;
         const pYahtzees = (pCard.yahtzee === 50 ? 1 : 0) + (pCard.yahtzeeBonusCount || 0);
@@ -271,8 +326,26 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       });
     }
 
+    // OPTIMISTIC LOCAL UPDATE: Immediately update state so category selection shows without delay
+    setGame(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        scores: updatedScores,
+        currentTurnIndex: nextTurnIndex,
+        round: nextRound,
+        status: newStatus,
+        rollsLeft: 3,
+        held: [false, false, false, false, false],
+        dice: [1, 2, 3, 4, 5],
+        isRolling: false,
+        winnerId: winnerId !== undefined ? winnerId : prev.winnerId
+      };
+    });
+
+    // FIRESTORE UPDATE: Use dot notation for score card to avoid overwriting other players' scores concurrently
     const updatePayload: Record<string, any> = {
-      scores: updatedScores,
+      [`scores.${myId}`]: updatedCard,
       currentTurnIndex: nextTurnIndex,
       round: nextRound,
       status: newStatus,
@@ -287,11 +360,16 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       updatePayload.winnerId = winnerId;
     }
 
-    await updateDoc(doc(db, 'games', gameId), updatePayload);
+    await updateDoc(doc(db, 'games', gameId), updatePayload).catch(err =>
+      console.error('Error updating score category:', err)
+    );
   };
 
   // Send in-game chat message
   const handleSendChat = async (textToSend?: string) => {
+    const currentGame = gameRef.current || game;
+    if (!currentGame) return;
+
     const text = (textToSend || chatText).trim();
     if (!text) return;
 
@@ -304,12 +382,15 @@ export const MultiplayerGame: React.FC<MultiplayerGameProps> = ({
       timestamp: Date.now()
     };
 
-    const updatedChat = [...(game.chat || []), newMsg];
     setChatText('');
+
+    // Optimistic local update
+    setGame(prev => prev ? { ...prev, chat: [...(prev.chat || []), newMsg] } : null);
+
     await updateDoc(doc(db, 'games', gameId), {
-      chat: updatedChat,
+      chat: arrayUnion(newMsg),
       updatedAt: Date.now()
-    });
+    }).catch(err => console.error('Error sending chat:', err));
   };
 
   // Render LOBBY Waiting Screen
